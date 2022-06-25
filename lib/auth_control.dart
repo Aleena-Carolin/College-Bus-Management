@@ -20,7 +20,7 @@ class AuthController extends GetxController {
   }
 
   _intialScreen(User? user) {
-    if (user == null) {
+    if (user != null) {
       print("login page");
       Get.offAll(() => LoginPage());
     } else {
@@ -30,8 +30,19 @@ class AuthController extends GetxController {
 
   Future<void> register(String userid, password) async {
     try {
-      await auth.createUserWithEmailAndPassword(
+      UserCredential? userCred = await auth.createUserWithEmailAndPassword(
           email: userid, password: password);
+      if (userCred != null) {
+        Get.snackbar("Success", "User registration was successful",
+            backgroundColor: Colors.greenAccent,
+            snackPosition: SnackPosition.BOTTOM,
+            titleText: Text(
+              "Successful",
+              style: TextStyle(color: Colors.white),
+            ),
+            messageText: Text("User registration was successful",
+                style: TextStyle(color: Colors.white)));
+      }
     } catch (e) {
       Get.snackbar("About User", "User message",
           backgroundColor: Colors.redAccent,
@@ -45,10 +56,12 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> login(String userid, password) async {
+  Future<UserCredential?> login(String userid, password) async {
     try {
-      await auth.signInWithEmailAndPassword(email: userid, password: password);
-    } catch (e) {
+      final credential = await auth.signInWithEmailAndPassword(
+          email: userid, password: password);
+      return credential;
+    } on FirebaseAuthException catch (e) {
       Get.snackbar("About Login", "Login message",
           backgroundColor: Colors.redAccent,
           snackPosition: SnackPosition.BOTTOM,
